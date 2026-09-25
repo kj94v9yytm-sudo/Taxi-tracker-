@@ -32,14 +32,6 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 .trip{padding:11px 0;border-bottom:1px solid #222}.trip:last-child{border-bottom:0}
 .nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(650px,100%);padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#08090aee;backdrop-filter:blur(15px);border-top:1px solid #202225;display:grid;grid-template-columns:repeat(5,1fr);z-index:5}.nav button{border:0;background:transparent;padding:7px 2px;font-size:11px;color:#8f9297}.nav button.active{color:var(--yellow)}.navIcon{font-size:20px;display:block;margin-bottom:2px}
 .notice{padding:9px 11px;border-radius:12px;background:#17181a;color:var(--muted);font-size:12px}
-
-.flightInfo{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap}
-.flightPill{display:flex;gap:8px;align-items:center;background:#17181a;border:1px solid #2b2d30;border-radius:12px;padding:9px 11px}
-.flightPill b{color:#25d366;font-size:12px}
-.flightSource{background:#080909;border:1px solid #2b2d30;border-radius:14px;overflow:hidden}
-.flightSource iframe{display:block;width:100%;height:520px;border:0;background:#050505}
-.flightActions{margin-top:10px}
-.yellowBtn{display:block;text-align:center;background:#ffd21a;color:#050505;text-decoration:none;font-weight:800;padding:12px;border-radius:12px}
 </style>
 </head>
 <body>
@@ -54,28 +46,20 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
     </div>
     <button class="small yellow" id="refreshFlights">↻ Aggiorna</button>
   </div>
-
   <div class="flightTabs">
-    <button class="flightTab active" data-flight-tab="live">🔴 Adesso</button>
-    <button class="flightTab" data-flight-tab="next">🟡 Prossima ora</button>
-    <button class="flightTab" data-flight-tab="later">🟢 1–2 ore</button>
+    <button class="flightTab active" data-flight-tab="arrivi">🟡 Arrivi</button>
+    <button class="flightTab" data-flight-tab="adesso">🔴 Adesso</button>
   </div>
-
   <div class="flightMeta">
-    <span id="flightStatus">Fonte gratuita · Fiumicino.it</span>
+    <span>Fonte gratuita · Fiumicino.it</span>
     <span id="flightClock"></span>
   </div>
-
   <div id="flights" class="flightList">
-    <div class="notice">
-      <b>Arrivi Fiumicino</b><br>
-      Tocca una fascia per aprire il tabellone aggiornato della fonte gratuita.
-    </div>
+    <div class="notice"><b>Arrivi Fiumicino</b><br>Apri il tabellone aggiornato per vedere i dati live.</div>
   </div>
-
   <div class="flightActions">
     <a class="yellowBtn" id="openFlights" href="https://www.fiumicino.it/arrivi" target="_blank" rel="noopener">✈️ Apri arrivi aggiornati</a>
-    <a class="darkBtn" href="https://www.fiumicino.it/adesso" target="_blank" rel="noopener">📡 Aerei in arrivo adesso</a>
+    <a class="darkBtn" id="openNow" href="https://www.fiumicino.it/adesso" target="_blank" rel="noopener">📡 Aerei in arrivo adesso</a>
   </div>
 </section>
 
@@ -238,36 +222,28 @@ $("saveRide").onclick=()=>{
   $("take").classList.remove("yellow");$("client").classList.remove("yellow");save();render();
 };
 $("cancel").onclick=()=>{ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00"};
-let flightTab="live";
-const flightData=[
-  {time:"—",code:"LIVE",route:"Aerei osservati in zona FCO",state:"Apri fonte live",cls:"live"},
-  {time:"—",code:"FCO",route:"Arrivi programmati / aggiornati",state:"Tabellone",cls:"done"},
-  {time:"—",code:"FCO",route:"Arrivi delle prossime 1–2 ore",state:"Tabellone",cls:"done"}
-];
 function renderFlights(){
-  const i=flightTab==="live"?0:flightTab==="next"?1:2;
-  const x=flightData[i];
-  $("flights").innerHTML=`
-    <div class="flightRow">
-      <div class="flightTime">${x.time}</div>
-      <div class="flightMain"><b>${x.code}</b><span>${x.route}</span></div>
-      <div class="flightState ${x.cls}">${x.state}</div>
-    </div>
-    <div class="notice" style="margin-top:8px">
-      I dati live vengono aperti direttamente dalla fonte gratuita per evitare di mostrare informazioni vecchie nella PWA.
-    </div>`;
-  $("flightClock").textContent=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
+  const live = document.querySelector(".flightTab.active")?.dataset.flightTab === "adesso";
+  $("flights").innerHTML = live
+    ? '<div class="notice"><b>📡 Aerei in arrivo adesso</b><br>Dati live disponibili nella fonte gratuita.</div>'
+    : '<div class="notice"><b>✈️ Arrivi Fiumicino</b><br>Tabellone aggiornato con voli, orari, provenienze, terminal e stato.</div>';
+  $("flightClock").textContent = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
 }
 document.querySelectorAll(".flightTab").forEach(b=>b.onclick=()=>{
-  flightTab=b.dataset.flightTab;
-  document.querySelectorAll(".flightTab").forEach(x=>x.classList.toggle("active",x===b));
+  document.querySelectorAll(".flightTab").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  const live=b.dataset.flightTab==="adesso";
+  $("openFlights").style.display=live?"none":"block";
+  $("openNow").style.display=live?"block":"none";
   renderFlights();
 });
-$("refreshFlights").onclick=()=>{renderFlights();window.open(flightTab==="live"?"https://www.fiumicino.it/adesso":"https://www.fiumicino.it/arrivi","_blank")};
+$("refreshFlights").onclick=()=>{
+  const live=document.querySelector(".flightTab.active")?.dataset.flightTab==="adesso";
+  window.open(live?"https://www.fiumicino.it/adesso":"https://www.fiumicino.it/arrivi","_blank");
+  renderFlights();
+};
 renderFlights();
-setInterval(()=>{$("flightClock").textContent=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})},15000);
-
-setInterval(()=>{
+setInterval(()=>{$("flightClock").textContent=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})},15000);setInterval(()=>{
   if(ride)$("rideTimer").textContent=fmt((Date.now()-ride.start)/1000);
   render();
 },1000);
