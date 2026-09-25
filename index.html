@@ -48,7 +48,7 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 <header class="header"><div class="brand"><div class="taxiIcon">🚕</div><div><div class="title">TAXI TRACKER FCO</div><div class="subtitle">Roma · Fiumicino</div></div></div><button class="gear">⚙️</button></header>
 
 <section class="card" data-page="home">
-<div class="shiftTop><b>🚕 Turno</b><div id="status" class="status">Non attivo</div></div>
+<div class="shiftTop"><b>🚕 Turno</b><div id="status" class="status">Non attivo</div></div>
 <div id="bigTime" class="bigtime">00:00:00</div><div id="startText" class="center muted">Pronto per iniziare</div>
 <div class="row" style="margin-top:12px"><button id="pause" class="hidden">⏸ Pausa</button><button id="shift" class="yellow">▶ Inizia turno</button></div>
 </section>
@@ -125,16 +125,16 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 </div>
 
 <nav class="nav">
-<button class="active" data-nav="home"><span class="navIcon">⌂</span>Home</button>
-<button data-nav="corse"><span class="navIcon">🚕</span>Corse</button>
-<button data-nav="fiumicino"><span class="navIcon">✈️</span>Fiumicino</button>
-<button data-nav="statistiche"><span class="navIcon">▥</span>Statistiche</button>
-<button data-nav="altro"><span class="navIcon">•••</span>Altro</button>
+<button type="button" class="active" data-nav="home" onclick="showPage('home')"><span class="navIcon">⌂</span>Home</button>
+<button type="button" data-nav="corse" onclick="showPage('corse')"><span class="navIcon">🚕</span>Corse</button>
+<button type="button" data-nav="fiumicino" onclick="showPage('fiumicino')"><span class="navIcon">✈️</span>Fiumicino</button>
+<button type="button" data-nav="statistiche" onclick="showPage('statistiche')"><span class="navIcon">▥</span>Statistiche</button>
+<button type="button" data-nav="altro" onclick="showPage('altro')"><span class="navIcon">•••</span>Altro</button>
 </nav>
 
 <script>
 "use strict";
-const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v10";
+const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v11";
 let raw=localStorage.getItem(KEY), old=null;
 if(!raw){
   for(const k of ["taxi_tracker_fco_v6","taxi_tracker_fco_v5","taxi_tracker_fco_v4"]){
@@ -307,17 +307,15 @@ save();render();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 function showPage(page){
-  document.querySelectorAll("[data-page]").forEach(el=>{
-    const pages=(el.dataset.page||"").split(/\s+/);
-    el.classList.toggle("page-hidden", !pages.includes(page));
+  document.querySelectorAll("[data-page]").forEach(function(el){
+    var pages=(el.getAttribute("data-page")||"").split(/\\s+/);
+    if(pages.indexOf(page)>=0) el.classList.remove("page-hidden");
+    else el.classList.add("page-hidden");
   });
-  document.querySelectorAll(".nav [data-nav]").forEach(b=>{
-    b.classList.toggle("active", b.dataset.nav===page);
+  document.querySelectorAll(".nav [data-nav]").forEach(function(b){
+    b.classList.toggle("active",b.getAttribute("data-nav")===page);
   });
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo(0,0);
 }
-document.querySelectorAll(".nav [data-nav]").forEach(b=>{
-  b.addEventListener("click",()=>showPage(b.dataset.nav));
-});
 showPage("home");
 </script></body></html>
