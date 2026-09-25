@@ -32,66 +32,44 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 .trip{padding:11px 0;border-bottom:1px solid #222}.trip:last-child{border-bottom:0}
 .nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(650px,100%);padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#08090aee;backdrop-filter:blur(15px);border-top:1px solid #202225;display:grid;grid-template-columns:repeat(5,1fr);z-index:5}.nav button{border:0;background:transparent;padding:7px 2px;font-size:11px;color:#8f9297}.nav button.active{color:var(--yellow)}.navIcon{font-size:20px;display:block;margin-bottom:2px}
 .notice{padding:9px 11px;border-radius:12px;background:#17181a;color:var(--muted);font-size:12px}
+
+.flightInfo{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.flightPill{display:flex;gap:8px;align-items:center;background:#17181a;border:1px solid #2b2d30;border-radius:12px;padding:9px 11px}
+.flightPill b{color:#25d366;font-size:12px}
+.flightSource{background:#080909;border:1px solid #2b2d30;border-radius:14px;overflow:hidden}
+.flightSource iframe{display:block;width:100%;height:520px;border:0;background:#050505}
+.flightActions{margin-top:10px}
+.yellowBtn{display:block;text-align:center;background:#ffd21a;color:#050505;text-decoration:none;font-weight:800;padding:12px;border-radius:12px}
 </style>
 </head>
 <body>
 <div class="app">
 <header class="header"><div class="brand"><div class="taxiIcon">🚕</div><div><div class="title">TAXI TRACKER FCO</div><div class="subtitle">Roma · Fiumicino</div></div></div><button class="gear">⚙️</button></header>
 
-<section class="card">
-<div class="shiftTop"><b>🚕 Turno</b><div id="status" class="status">Non attivo</div></div>
-<div id="bigTime" class="bigtime">00:00:00</div><div id="startText" class="center muted">Pronto per iniziare</div>
-<div class="row" style="margin-top:12px"><button id="pause" class="hidden">⏸ Pausa</button><button id="shift" class="yellow">▶ Inizia turno</button></div>
-</section>
+<section class="card" id="flightCard">
+  <div class="row" style="justify-content:space-between;align-items:center">
+    <div>
+      <div class="eyebrow">✈️ FIUMICINO</div>
+      <h2 style="margin:4px 0 0">Arrivi live</h2>
+    </div>
+    <button class="small yellow" id="refreshFlights">↻ Aggiorna</button>
+  </div>
 
-<section class="card">
-<div class="sectionTitle"><span>🚗 Chilometri turno</span><span id="kmDone" class="yellowText">0 km</span></div>
-<div class="row">
-  <div><label>Km iniziali</label><input id="kmStart" type="number" inputmode="numeric" min="0" step="1" placeholder="es. 125000"></div>
-  <div><label>Km finali</label><input id="kmEnd" type="number" inputmode="numeric" min="0" step="1" placeholder="A fine turno"></div>
-</div>
-<div class="muted" style="margin-top:8px">I km del turno vengono calcolati automaticamente come km finali − km iniziali.</div>
-</section>
+  <div class="flightInfo">
+    <div class="flightPill"><b>LIVE</b><span>Tabellone arrivi FCO</span></div>
+    <div class="muted" id="flightUpdated">Fonte gratuita · Fiumicino.it</div>
+  </div>
 
-<section class="grid">
-<div class="stat"><div class="label">🚕 Corse</div><div id="rides" class="value">0</div></div>
-<div class="stat"><div class="label">💰 Incasso totale</div><div id="income" class="value">€0,00</div></div>
-<div class="stat"><div class="label">⏱ Ore lavorate</div><div id="hours" class="value">0:00</div></div>
-<div class="stat"><div class="label">📈 €/ora</div><div id="hourly" class="value">€0,00</div></div>
-<div class="stat"><div class="label">💶 Media/corsa</div><div id="avg" class="value">€0,00</div></div>
-<div class="stat"><div class="label">⏱ Durata media</div><div id="avgDur" class="value">0:00</div></div>
-</section>
+  <div id="flights" class="flightSource">
+    <div class="notice">
+      <b>Arrivi aggiornati</b><br>
+      Orario previsto/aggiornato · volo · provenienza · terminal · stato.
+    </div>
+  </div>
 
-<section class="card">
-<div class="sectionTitle"><span>🚕 NUOVA CORSA</span><span id="rideTimer" class="muted">00:00</span></div>
-<div class="quick">
-<button id="take"><span>🚩</span>Corsa presa</button>
-<button id="client"><span>👥</span>Cliente a bordo</button>
-<button id="finish" class="yellow"><span>🏁</span>Fine corsa</button>
-<button id="openAmount"><span>€</span>Incasso</button>
-</div>
-</section>
-
-<section id="rideBox" class="card hidden">
-<div class="sectionTitle">💶 Incasso corsa</div>
-<label>Importo €</label><input id="amount" type="number" inputmode="decimal" placeholder="0,00" step=".01">
-<div class="amountRow"><button data-a="10">10</button><button data-a="15">15</button><button data-a="20">20</button><button data-a="25">25</button><button data-a="30">30</button></div>
-<label style="margin-top:12px">Metodo di pagamento</label>
-<div class="pay" id="pay">
-<button data-p="Contanti" class="active">💵<br>Contanti</button>
-<button data-p="POS">💳<br>POS</button>
-<button data-p="AppItTaxi">🚕<br>AppItTaxi</button>
-<button data-p="UBER">📱<br>UBER</button>
-<button data-p="Buoni">🎟<br>Buoni</button>
-</div>
-<div id="selectedPayment" class="notice" style="margin-top:8px">Pagamento selezionato: Contanti</div>
-<button id="saveRide" class="yellow" style="width:100%;margin-top:12px">Salva incasso e corsa</button>
-<button id="cancel" style="width:100%;margin-top:7px">Annulla</button>
-</section>
-
-<section class="card">
-<div class="sectionTitle"><span>✈️ Prossimi arrivi Fiumicino</span><button id="refresh" class="smallBtn">↻ Aggiorna</button></div>
-<div id="flights"><div class="notice">Aggiorna per caricare gli arrivi disponibili.</div></div>
+  <div class="flightActions">
+    <a class="yellowBtn" href="https://www.fiumicino.it/arrivi" target="_blank" rel="noopener">✈️ Apri tabellone completo</a>
+  </div>
 </section>
 
 <section class="card"><div class="sectionTitle">💶 Incassi per metodo</div><div id="methods"></div></section>
@@ -108,59 +86,162 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 
 <script>
 "use strict";
-const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v4";
-let s=JSON.parse(localStorage.getItem(KEY)||"null")||{shift:null,rides:[]},ride=null,selectedPay="Contanti";
-if(!Array.isArray(s.rides)) s.rides=[];
+const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v8";
+let raw=localStorage.getItem(KEY), old=null;
+if(!raw){
+  for(const k of ["taxi_tracker_fco_v6","taxi_tracker_fco_v5","taxi_tracker_fco_v4"]){
+    const v=localStorage.getItem(k);
+    if(v){try{old=JSON.parse(v);break}catch(e){}}
+  }
+}
+let s=raw?JSON.parse(raw):old||{shift:null,shifts:[],rides:[]},ride=null,selectedPay="Contanti";
+if(!Array.isArray(s.rides))s.rides=[];
+if(!Array.isArray(s.shifts))s.shifts=[];
+if(s.shift){
+  s.shifts.push({...s.shift});
+  s.shift=null;
+}
 s.rides=s.rides.map(x=>({...x,payment:x.payment==="Uber"?"UBER":x.payment}));
 const euro=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(n||0);
-const fmt=s=>{s=Math.max(0,Math.floor(s));let h=Math.floor(s/3600),m=Math.floor(s%3600/60),q=s%60;return h?`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`:`${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`};
-const today=()=>s.rides.filter(x=>new Date(x.end).toDateString()===new Date().toDateString());
-function work(){if(!s.shift)return 0;let end=s.shift.active?Date.now():s.shift.end;return Math.max(0,(end-s.shift.start)/1000-(s.shift.pausedSec||0)-(s.shift.paused&&s.shift.pauseAt?(Date.now()-s.shift.pauseAt)/1000:0))}
+const fmt=s=>{s=Math.max(0,Math.floor(s||0));let h=Math.floor(s/3600),m=Math.floor(s%3600/60),q=s%60;return h?`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`:`${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`};
+const dayKey=d=>new Date(d).toLocaleDateString("it-IT");
+const today=()=>s.rides.filter(x=>dayKey(x.end)===dayKey(Date.now()));
+const todayShifts=()=>s.shifts.filter(x=>dayKey(x.start)===dayKey(Date.now()));
+function work(){
+  let total=todayShifts().reduce((a,x)=>{
+    const end=x.end||Date.now();
+    return a+Math.max(0,(end-x.start)/1000-(x.pausedSec||0));
+  },0);
+  if(s.shift){
+    const end=s.shift.active?Date.now():s.shift.end;
+    total+=Math.max(0,(end-s.shift.start)/1000-(s.shift.pausedSec||0)-(s.shift.paused&&s.shift.pauseAt?(Date.now()-s.shift.pauseAt)/1000:0));
+  }
+  return Math.max(0,total);
+}
 function save(){localStorage.setItem(KEY,JSON.stringify(s))}
 function kmValue(id){const n=parseFloat($(id).value);return Number.isFinite(n)?n:null}
 function render(){
-let rs=today(),inc=rs.reduce((a,x)=>a+x.amount,0),w=work();$("income").textContent=euro(inc);$("rides").textContent=rs.length;$("hours").textContent=fmt(w);$("hourly").textContent=euro(w?inc/(w/3600):0);$("avg").textContent=euro(rs.length?inc/rs.length:0);$("avgDur").textContent=fmt(rs.length?rs.reduce((a,x)=>a+x.duration,0)/rs.length:0);
-$("shift").textContent=s.shift?.active?(s.shift.paused?"▶ Riprendi":"■ Fine turno"):"▶ Inizia turno";$("shift").className=s.shift?.active?"red":"yellow";$("pause").classList.toggle("hidden",!s.shift?.active);$("pause").textContent=s.shift?.paused?"▶ Riprendi":"⏸ Pausa";$("status").innerHTML=s.shift?.active?(s.shift.paused?"Pausa":"In corso")+" <span class='dot'></span>":"Non attivo";$("startText").textContent=s.shift?.active?"Iniziato alle "+new Date(s.shift.start).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}):"Pronto per iniziare";
-$("bigTime").textContent=fmt(w);
-if(s.shift){
-  $("kmStart").value=s.shift.kmStart??"";
-  $("kmEnd").value=s.shift.kmEnd??"";
-  const ks=Number(s.shift.kmStart), ke=Number(s.shift.kmEnd);
-  $("kmDone").textContent=(Number.isFinite(ks)&&Number.isFinite(ke)&&ke>=ks)?((ke-ks).toFixed(1).replace(".",",")+" km"):"0 km";
+  let rs=today(),inc=rs.reduce((a,x)=>a+x.amount,0),w=work();
+  $("income").textContent=euro(inc);
+  $("rides").textContent=rs.length;
+  $("hours").textContent=fmt(w);
+  $("hourly").textContent=euro(w?inc/(w/3600):0);
+  $("avg").textContent=euro(rs.length?inc/rs.length:0);
+  $("avgDur").textContent=fmt(rs.length?rs.reduce((a,x)=>a+x.duration,0)/rs.length:0);
+
+  $("shift").textContent=s.shift?.active?(s.shift.paused?"▶ Riprendi":"■ Fine turno"):"▶ Nuovo turno";
+  $("shift").className=s.shift?.active?"red":"yellow";
+  $("pause").classList.toggle("hidden",!s.shift?.active);
+  $("pause").textContent=s.shift?.paused?"▶ Riprendi":"⏸ Pausa";
+  $("status").innerHTML=s.shift?.active?(s.shift.paused?"Pausa":"In corso")+" <span class='dot'></span>":"Non attivo";
+  $("startText").textContent=s.shift?.active
+    ?"Iniziato alle "+new Date(s.shift.start).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})
+    :(todayShifts().length?"Pronto per un nuovo turno":"Pronto per iniziare");
+
+  $("bigTime").textContent=fmt(w);
+
+  if(s.shift){
+    $("kmStart").value=s.shift.kmStart??"";
+    $("kmEnd").value=s.shift.kmEnd??"";
+    const ks=Number(s.shift.kmStart),ke=Number(s.shift.kmEnd);
+    $("kmDone").textContent=(Number.isFinite(ks)&&Number.isFinite(ke)&&ke>=ks)?((ke-ks).toFixed(1).replace(".",",")+" km"):"0 km";
+  }else{
+    $("kmStart").value="";
+    $("kmEnd").value="";
+    $("kmDone").textContent="0 km";
+  }
+
+  let m={Contanti:0,POS:0,AppItTaxi:0,UBER:0,Buoni:0};
+  rs.forEach(x=>m[x.payment]=(m[x.payment]||0)+x.amount);
+  $("methods").innerHTML=Object.entries(m).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0"><span>${k}</span><b>${euro(v)}</b></div>`).join("");
+  $("list").innerHTML=rs.length
+    ?rs.slice().reverse().map(x=>`<div class="trip"><b>${euro(x.amount)}</b> · ${x.payment}<br><span class="muted">${new Date(x.end).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})} · ${fmt(x.duration)}</span></div>`).join("")
+    :"Nessuna corsa.";
 }
-let m={Contanti:0,POS:0,AppItTaxi:0,UBER:0,Buoni:0};rs.forEach(x=>m[x.payment]+=x.amount);$("methods").innerHTML=Object.entries(m).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0"><span>${k}</span><b>${euro(v)}</b></div>`).join("");
-$("list").innerHTML=rs.length?rs.slice().reverse().map(x=>`<div class="trip"><b>${euro(x.amount)}</b> · ${x.payment}<br><span class="muted">${new Date(x.end).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})} · ${fmt(x.duration)}</span></div>`).join(""):"Nessuna corsa.";
-}
+
 $("shift").onclick=()=>{
- if(s.shift?.active){
-   const ke=kmValue("kmEnd");
-   if(s.shift.kmStart!==null && s.shift.kmStart!==undefined && ke===null){
-     alert("Inserisci i km finali prima di terminare il turno."); $("kmEnd").focus(); return;
-   }
-   if(ke!==null && s.shift.kmStart!==null && ke<s.shift.kmStart){
-     alert("I km finali non possono essere inferiori ai km iniziali."); return;
-   }
-   if(s.shift.paused){s.shift.pausedSec+=(Date.now()-s.shift.pauseAt)/1000;s.shift.paused=false;s.shift.pauseAt=null}
-   s.shift.kmEnd=ke;
-   s.shift.active=false;s.shift.end=Date.now();
- }else{
-   const ks=kmValue("kmStart");
-   s.shift={active:true,start:Date.now(),end:null,paused:false,pauseAt:null,pausedSec:0,kmStart:ks,kmEnd:null};
- }
- save();render();
+  if(s.shift?.active){
+    const ke=kmValue("kmEnd");
+    if(s.shift.kmStart!==null&&s.shift.kmStart!==undefined&&ke===null){
+      alert("Inserisci i km finali prima di terminare il turno.");$("kmEnd").focus();return;
+    }
+    if(ke!==null&&s.shift.kmStart!==null&&s.shift.kmStart!==undefined&&ke<s.shift.kmStart){
+      alert("I km finali non possono essere inferiori ai km iniziali.");return;
+    }
+    if(s.shift.paused){
+      s.shift.pausedSec+=(Date.now()-s.shift.pauseAt)/1000;
+      s.shift.paused=false;s.shift.pauseAt=null;
+    }
+    s.shift.kmEnd=ke;
+    s.shift.active=false;s.shift.end=Date.now();
+    s.shifts.push({...s.shift});
+    s.shift=null;
+  }else{
+    const ks=kmValue("kmStart");
+    s.shift={active:true,start:Date.now(),end:null,paused:false,pauseAt:null,pausedSec:0,kmStart:ks,kmEnd:null};
+  }
+  save();render();
 };
-$("kmStart").addEventListener("change",()=>{if(s.shift?.active){const v=kmValue("kmStart");if(v!==null)s.shift.kmStart=v;save();render()}});
-$("kmEnd").addEventListener("change",()=>{if(s.shift?.active){const v=kmValue("kmEnd");if(v!==null)s.shift.kmEnd=v;save();render()}});
-$("pause").onclick=()=>{if(!s.shift?.active)return;if(s.shift.paused){s.shift.pausedSec+=(Date.now()-s.shift.pauseAt)/1000;s.shift.paused=false;s.shift.pauseAt=null}else{s.shift.paused=true;s.shift.pauseAt=Date.now()}save();render()};
-$("take").onclick=()=>{if(!s.shift?.active||s.shift.paused){alert(s.shift?.paused?"Il turno è in pausa.":"Prima inizia il turno.");return}if(!ride)ride={start:Date.now()};$("rideBox").classList.remove("hidden");$("rideTimer").textContent="00:00";$("take").classList.add("yellow")};
+
+$("kmStart").addEventListener("change",()=>{
+  if(s.shift?.active){
+    const v=kmValue("kmStart");
+    if(v!==null)s.shift.kmStart=v;
+    save();render();
+  }
+});
+$("kmEnd").addEventListener("change",()=>{
+  if(s.shift?.active){
+    const v=kmValue("kmEnd");
+    if(v!==null)s.shift.kmEnd=v;
+    save();render();
+  }
+});
+$("pause").onclick=()=>{
+  if(!s.shift?.active)return;
+  if(s.shift.paused){
+    s.shift.pausedSec+=(Date.now()-s.shift.pauseAt)/1000;
+    s.shift.paused=false;s.shift.pauseAt=null;
+  }else{
+    s.shift.paused=true;s.shift.pauseAt=Date.now();
+  }
+  save();render();
+};
+
+$("take").onclick=()=>{
+  if(!s.shift?.active||s.shift.paused){alert(s.shift?.paused?"Il turno è in pausa.":"Prima inizia il turno.");return}
+  if(!ride)ride={start:Date.now()};
+  $("rideBox").classList.remove("hidden");$("rideTimer").textContent="00:00";$("take").classList.add("yellow");
+};
 $("client").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}ride.client=true;$("client").classList.add("yellow")};
 $("finish").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}$("rideBox").classList.remove("hidden");$("amount").focus()};
 $("openAmount").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}$("rideBox").classList.remove("hidden");$("amount").focus()};
 document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("amount").value=b.dataset.a});
-document.querySelectorAll("#pay button").forEach(b=>b.onclick=()=>{selectedPay=b.dataset.p;document.querySelectorAll("#pay button").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("selectedPayment").textContent="Pagamento selezionato: "+selectedPay});
-$("saveRide").onclick=()=>{if(!ride)return;let end=Date.now(),a=parseFloat($("amount").value)||0;s.rides.push({start:ride.start,end,duration:(end-ride.start)/1000,amount:a,payment:selectedPay});ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00";$("amount").value="";$("take").classList.remove("yellow");$("client").classList.remove("yellow");save();render()};
+document.querySelectorAll("#pay button").forEach(b=>b.onclick=()=>{
+  selectedPay=b.dataset.p;
+  document.querySelectorAll("#pay button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  $("selectedPayment").textContent="Pagamento selezionato: "+selectedPay;
+});
+$("saveRide").onclick=()=>{
+  if(!ride)return;
+  let end=Date.now(),a=parseFloat($("amount").value)||0;
+  s.rides.push({start:ride.start,end,duration:(end-ride.start)/1000,amount:a,payment:selectedPay});
+  ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00";$("amount").value="";
+  $("take").classList.remove("yellow");$("client").classList.remove("yellow");save();render();
+};
 $("cancel").onclick=()=>{ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00"};
-$("refresh").onclick=()=>{$("flights").innerHTML='<div class="notice">✈️ Aggiornamento richiesto. I dati live dipendono dalla fonte gratuita disponibile.</div>'};
-setInterval(()=>{if(ride)$("rideTimer").textContent=fmt((Date.now()-ride.start)/1000);render()},1000);render();
+function loadFlights(){
+  $("flights").innerHTML='<iframe src="https://www.fiumicino.it/arrivi" title="Arrivi Fiumicino"></iframe>';
+  $("flightUpdated").textContent="Aggiornato dalla fonte gratuita · Fiumicino.it";
+}
+$("refreshFlights").onclick=loadFlights;
+loadFlights();
+
+setInterval(()=>{
+  if(ride)$("rideTimer").textContent=fmt((Date.now()-ride.start)/1000);
+  render();
+},1000);
+save();render();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
