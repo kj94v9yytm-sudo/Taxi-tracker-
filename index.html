@@ -50,25 +50,32 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
   <div class="row" style="justify-content:space-between;align-items:center">
     <div>
       <div class="eyebrow">✈️ FIUMICINO</div>
-      <h2 style="margin:4px 0 0">Arrivi live</h2>
+      <h2 style="margin:4px 0 0">Arrivi</h2>
     </div>
     <button class="small yellow" id="refreshFlights">↻ Aggiorna</button>
   </div>
 
-  <div class="flightInfo">
-    <div class="flightPill"><b>LIVE</b><span>Tabellone arrivi FCO</span></div>
-    <div class="muted" id="flightUpdated">Fonte gratuita · Fiumicino.it</div>
+  <div class="flightTabs">
+    <button class="flightTab active" data-flight-tab="live">🔴 Adesso</button>
+    <button class="flightTab" data-flight-tab="next">🟡 Prossima ora</button>
+    <button class="flightTab" data-flight-tab="later">🟢 1–2 ore</button>
   </div>
 
-  <div id="flights" class="flightSource">
+  <div class="flightMeta">
+    <span id="flightStatus">Fonte gratuita · Fiumicino.it</span>
+    <span id="flightClock"></span>
+  </div>
+
+  <div id="flights" class="flightList">
     <div class="notice">
-      <b>Arrivi aggiornati</b><br>
-      Orario previsto/aggiornato · volo · provenienza · terminal · stato.
+      <b>Arrivi Fiumicino</b><br>
+      Tocca una fascia per aprire il tabellone aggiornato della fonte gratuita.
     </div>
   </div>
 
   <div class="flightActions">
-    <a class="yellowBtn" href="https://www.fiumicino.it/arrivi" target="_blank" rel="noopener">✈️ Apri tabellone completo</a>
+    <a class="yellowBtn" id="openFlights" href="https://www.fiumicino.it/arrivi" target="_blank" rel="noopener">✈️ Apri arrivi aggiornati</a>
+    <a class="darkBtn" href="https://www.fiumicino.it/adesso" target="_blank" rel="noopener">📡 Aerei in arrivo adesso</a>
   </div>
 </section>
 
@@ -86,7 +93,7 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 
 <script>
 "use strict";
-const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v8";
+const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v9";
 let raw=localStorage.getItem(KEY), old=null;
 if(!raw){
   for(const k of ["taxi_tracker_fco_v6","taxi_tracker_fco_v5","taxi_tracker_fco_v4"]){
@@ -231,12 +238,34 @@ $("saveRide").onclick=()=>{
   $("take").classList.remove("yellow");$("client").classList.remove("yellow");save();render();
 };
 $("cancel").onclick=()=>{ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00"};
-function loadFlights(){
-  $("flights").innerHTML='<iframe src="https://www.fiumicino.it/arrivi" title="Arrivi Fiumicino"></iframe>';
-  $("flightUpdated").textContent="Aggiornato dalla fonte gratuita · Fiumicino.it";
+let flightTab="live";
+const flightData=[
+  {time:"—",code:"LIVE",route:"Aerei osservati in zona FCO",state:"Apri fonte live",cls:"live"},
+  {time:"—",code:"FCO",route:"Arrivi programmati / aggiornati",state:"Tabellone",cls:"done"},
+  {time:"—",code:"FCO",route:"Arrivi delle prossime 1–2 ore",state:"Tabellone",cls:"done"}
+];
+function renderFlights(){
+  const i=flightTab==="live"?0:flightTab==="next"?1:2;
+  const x=flightData[i];
+  $("flights").innerHTML=`
+    <div class="flightRow">
+      <div class="flightTime">${x.time}</div>
+      <div class="flightMain"><b>${x.code}</b><span>${x.route}</span></div>
+      <div class="flightState ${x.cls}">${x.state}</div>
+    </div>
+    <div class="notice" style="margin-top:8px">
+      I dati live vengono aperti direttamente dalla fonte gratuita per evitare di mostrare informazioni vecchie nella PWA.
+    </div>`;
+  $("flightClock").textContent=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
 }
-$("refreshFlights").onclick=loadFlights;
-loadFlights();
+document.querySelectorAll(".flightTab").forEach(b=>b.onclick=()=>{
+  flightTab=b.dataset.flightTab;
+  document.querySelectorAll(".flightTab").forEach(x=>x.classList.toggle("active",x===b));
+  renderFlights();
+});
+$("refreshFlights").onclick=()=>{renderFlights();window.open(flightTab==="live"?"https://www.fiumicino.it/adesso":"https://www.fiumicino.it/arrivi","_blank")};
+renderFlights();
+setInterval(()=>{$("flightClock").textContent=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})},15000);
 
 setInterval(()=>{
   if(ride)$("rideTimer").textContent=fmt((Date.now()-ride.start)/1000);
