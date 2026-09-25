@@ -1,9 +1,1 @@
-{
-  "name": "Taxi Tracker FCO",
-  "short_name": "Taxi FCO",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#f3f4f6",
-  "theme_color": "#111827",
-  "lang": "it"
-}
+{"name":"Taxi Tracker FCO","short_name":"Taxi FCO","start_url":".","display":"standalone","background_color":"#050505","theme_color":"#050505","lang":"it"}

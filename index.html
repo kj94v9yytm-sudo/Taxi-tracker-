@@ -1,59 +1,166 @@
 <!doctype html>
-<html lang="it"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.webmanifest">
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Taxi Tracker FCO</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{max-width:650px;margin:auto;padding:16px 14px 40px}.card{background:#fff;border-radius:18px;padding:16px;margin:10px 0;box-shadow:0 2px 12px #0001}h1{font-size:25px;margin:0 0 12px}
-button,input,select{font:inherit;border-radius:12px;border:1px solid #d1d5db;padding:12px;background:#fff}button{font-weight:700;width:100%}.primary{background:#111827;color:#fff}.danger{background:#fee2e2}.row{display:flex;gap:8px}.row>*{flex:1}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f8fafc;border-radius:14px;padding:12px}.label{font-size:13px;color:#6b7280}.value{font-size:21px;font-weight:700;margin-top:4px}.muted{font-size:13px;color:#6b7280}.hidden{display:none!important}.trip{padding:10px 0;border-bottom:1px solid #eee}
-</style></head><body><main>
-<h1>🚕 Taxi Tracker FCO</h1>
-<section class="card"><div class="row">
-<button id="shift" class="primary">Inizia turno</button><button id="pause" class="hidden">Pausa</button></div>
-<div id="status" class="muted" style="margin-top:8px">Turno non attivo</div></section>
+:root{--bg:#050505;--card:#101112;--card2:#17181a;--line:#2b2d30;--text:#f5f5f5;--muted:#9b9da1;--yellow:#ffd21a;--green:#25d366;--red:#ef4444}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding-bottom:env(safe-area-inset-bottom)}button,input,select{font:inherit}
+.app{max-width:650px;margin:auto;padding:12px 12px 92px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 14px}.brand{display:flex;align-items:center;gap:10px}.taxiIcon{font-size:31px}.title{font-size:22px;font-weight:800}.subtitle{font-size:12px;color:var(--muted)}
+.gear{border:0;background:var(--card2);color:white;border-radius:12px;width:42px;height:42px;font-size:20px}
+.card{background:linear-gradient(145deg,#111315,#0b0c0d);border:1px solid #202225;border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 8px 24px #0008}
+.shiftTop{display:flex;justify-content:space-between;align-items:center}.status{font-weight:700}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);margin-left:5px}
+.bigtime{text-align:center;font-size:34px;font-weight:800;margin:13px 0 2px;font-variant-numeric:tabular-nums}.center{text-align:center}
+.row{display:flex;gap:8px}.row>*{flex:1}
+button{border:1px solid var(--line);border-radius:13px;padding:12px 10px;background:var(--card2);color:var(--text);font-weight:750}
+button.yellow,.yellow{background:var(--yellow);color:#111;border-color:var(--yellow)}button.red{background:#8f2020;border-color:#b72a2a;color:white}
+button:active{transform:scale(.98)}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat{background:#111315;border:1px solid #202225;border-radius:15px;padding:12px}.label{font-size:12px;color:var(--muted)}.value{font-size:20px;font-weight:800;margin-top:4px}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:17px;margin-bottom:10px}
+.smallBtn{width:auto;padding:8px 11px;font-size:12px}.muted{color:var(--muted);font-size:13px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:9px}.quick button{padding:18px 8px;font-size:15px}.quick span{display:block;font-size:24px;margin-bottom:5px}
+input,select{width:100%;background:#0d0f10;color:white;border:1px solid #34363a;padding:13px;border-radius:13px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
+.amountRow{display:flex;gap:7px;margin-top:8px}.amountRow button{padding:9px 5px;font-size:13px}
+.pay{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.pay button{font-size:12px;padding:11px 4px}.pay button.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+.plane{border:1px solid #25272a;background:#0d0f10;border-radius:13px;padding:12px;margin:7px 0}.planeHead{display:flex;justify-content:space-between}.green{color:var(--green)}.yellowText{color:var(--yellow)}
+.trip{padding:11px 0;border-bottom:1px solid #222}.trip:last-child{border-bottom:0}
+.nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(650px,100%);padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#08090aee;backdrop-filter:blur(15px);border-top:1px solid #202225;display:grid;grid-template-columns:repeat(5,1fr);z-index:5}.nav button{border:0;background:transparent;padding:7px 2px;font-size:11px;color:#8f9297}.nav button.active{color:var(--yellow)}.navIcon{font-size:20px;display:block;margin-bottom:2px}
+.notice{padding:9px 11px;border-radius:12px;background:#17181a;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header"><div class="brand"><div class="taxiIcon">🚕</div><div><div class="title">TAXI TRACKER FCO</div><div class="subtitle">Roma · Fiumicino</div></div></div><button class="gear">⚙️</button></header>
 
-<section class="grid">
-<div class="stat"><div class="label">Incasso oggi</div><div id="income" class="value">€0,00</div></div>
-<div class="stat"><div class="label">Corse</div><div id="rides" class="value">0</div></div>
-<div class="stat"><div class="label">Ore lavorate</div><div id="hours" class="value">0:00</div></div>
-<div class="stat"><div class="label">€/ora</div><div id="hourly" class="value">€0,00</div></div>
+<section class="card">
+<div class="shiftTop"><b>🚕 Turno</b><div id="status" class="status">Non attivo</div></div>
+<div id="bigTime" class="bigtime">00:00:00</div><div id="startText" class="center muted">Pronto per iniziare</div>
+<div class="row" style="margin-top:12px"><button id="pause" class="hidden">⏸ Pausa</button><button id="shift" class="yellow">▶ Inizia turno</button></div>
 </section>
 
-<section class="card"><b>🚕 Corsa in corso</b><div id="rideState" style="font-size:21px;font-weight:700;margin:8px 0">nessuna</div><div id="rideTime" class="muted">00:00</div>
-<div class="row" style="margin-top:10px"><button id="take">🚕 Corsa presa</button><button id="client">👤 Cliente prelevato</button></div></section>
+<section class="card">
+<div class="sectionTitle"><span>🚗 Chilometri turno</span><span id="kmDone" class="yellowText">0 km</span></div>
+<div class="row">
+  <div><label>Km iniziali</label><input id="kmStart" type="number" inputmode="numeric" min="0" step="1" placeholder="es. 125000"></div>
+  <div><label>Km finali</label><input id="kmEnd" type="number" inputmode="numeric" min="0" step="1" placeholder="A fine turno"></div>
+</div>
+<div class="muted" style="margin-top:8px">I km del turno vengono calcolati automaticamente come km finali − km iniziali.</div>
+</section>
 
-<section id="saveBox" class="card hidden"><label>Importo €</label><input id="amount" type="number" inputmode="decimal" step=".01" style="width:100%;margin-top:5px">
-<label style="display:block;margin-top:10px">Pagamento</label><select id="payment" style="width:100%;margin-top:5px"><option>Uber</option><option>POS</option><option>Contanti</option><option>Buoni</option></select>
-<div class="row" style="margin-top:10px"><button id="saveRide" class="primary">Salva corsa</button><button id="cancel">Annulla</button></div></section>
+<section class="grid">
+<div class="stat"><div class="label">🚕 Corse</div><div id="rides" class="value">0</div></div>
+<div class="stat"><div class="label">💰 Incasso totale</div><div id="income" class="value">€0,00</div></div>
+<div class="stat"><div class="label">⏱ Ore lavorate</div><div id="hours" class="value">0:00</div></div>
+<div class="stat"><div class="label">📈 €/ora</div><div id="hourly" class="value">€0,00</div></div>
+<div class="stat"><div class="label">💶 Media/corsa</div><div id="avg" class="value">€0,00</div></div>
+<div class="stat"><div class="label">⏱ Durata media</div><div id="avgDur" class="value">0:00</div></div>
+</section>
 
-<section class="card"><b>💶 Incassi per metodo</b><div id="methods"></div></section>
-<section class="card"><div class="row"><b>✈️ Fiumicino FCO — arrivi</b><button id="refresh">Aggiorna dati</button></div><div id="flights" class="muted" style="margin-top:10px">Premi Aggiorna dati per gli arrivi.</div></section>
-<section class="card"><b>📊 Riepilogo</b><div class="grid" style="margin-top:10px"><div class="stat"><div class="label">Media/corsa</div><div id="avg" class="value">€0,00</div></div><div class="stat"><div class="label">Durata media</div><div id="avgDur" class="value">0:00</div></div><div class="stat"><div class="label">Aerei oggi</div><div id="flightCount" class="value">0</div></div><div class="stat"><div class="label">Corse/ora</div><div id="ridesHour" class="value">0,00</div></div></div></section>
-<section class="card"><b>🧾 Corse di oggi</b><div id="list" class="muted" style="margin-top:8px">Nessuna corsa.</div></section>
-</main>
+<section class="card">
+<div class="sectionTitle"><span>🚕 NUOVA CORSA</span><span id="rideTimer" class="muted">00:00</span></div>
+<div class="quick">
+<button id="take"><span>🚩</span>Corsa presa</button>
+<button id="client"><span>👥</span>Cliente a bordo</button>
+<button id="finish" class="yellow"><span>🏁</span>Fine corsa</button>
+<button id="openAmount"><span>€</span>Incasso</button>
+</div>
+</section>
+
+<section id="rideBox" class="card hidden">
+<div class="sectionTitle">💶 Incasso corsa</div>
+<label>Importo €</label><input id="amount" type="number" inputmode="decimal" placeholder="0,00" step=".01">
+<div class="amountRow"><button data-a="10">10</button><button data-a="15">15</button><button data-a="20">20</button><button data-a="25">25</button><button data-a="30">30</button></div>
+<label style="margin-top:12px">Metodo di pagamento</label>
+<div class="pay" id="pay">
+<button data-p="Contanti" class="active">💵<br>Contanti</button>
+<button data-p="POS">💳<br>POS</button>
+<button data-p="AppItTaxi">🚕<br>AppItTaxi</button>
+<button data-p="UBER">📱<br>UBER</button>
+<button data-p="Buoni">🎟<br>Buoni</button>
+</div>
+<div id="selectedPayment" class="notice" style="margin-top:8px">Pagamento selezionato: Contanti</div>
+<button id="saveRide" class="yellow" style="width:100%;margin-top:12px">Salva incasso e corsa</button>
+<button id="cancel" style="width:100%;margin-top:7px">Annulla</button>
+</section>
+
+<section class="card">
+<div class="sectionTitle"><span>✈️ Prossimi arrivi Fiumicino</span><button id="refresh" class="smallBtn">↻ Aggiorna</button></div>
+<div id="flights"><div class="notice">Aggiorna per caricare gli arrivi disponibili.</div></div>
+</section>
+
+<section class="card"><div class="sectionTitle">💶 Incassi per metodo</div><div id="methods"></div></section>
+<section class="card"><div class="sectionTitle">🧾 Corse di oggi</div><div id="list" class="muted">Nessuna corsa.</div></section>
+</div>
+
+<nav class="nav">
+<button class="active"><span class="navIcon">⌂</span>Home</button>
+<button><span class="navIcon">🚕</span>Corse</button>
+<button><span class="navIcon">✈️</span>Fiumicino</button>
+<button><span class="navIcon">▥</span>Statistiche</button>
+<button><span class="navIcon">•••</span>Altro</button>
+</nav>
+
 <script>
 "use strict";
-const $=id=>document.getElementById(id), KEY="ttfco_v2";
-let state=JSON.parse(localStorage.getItem(KEY)||"null")||{shift:null,rides:[]}, ride=null, timer=null;
+const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v4";
+let s=JSON.parse(localStorage.getItem(KEY)||"null")||{shift:null,rides:[]},ride=null,selectedPay="Contanti";
+if(!Array.isArray(s.rides)) s.rides=[];
+s.rides=s.rides.map(x=>({...x,payment:x.payment==="Uber"?"UBER":x.payment}));
 const euro=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(n||0);
-const dur=s=>{s=Math.max(0,Math.floor(s));let h=Math.floor(s/3600),m=Math.floor(s%3600/60),q=s%60;return h?`${h}:${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`:`${m}:${String(q).padStart(2,"0")}`};
-const today=()=>state.rides.filter(x=>new Date(x.end).toDateString()===new Date().toDateString());
-function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
-function workSec(){if(!state.shift)return 0;let end=state.shift.active?Date.now():state.shift.end;return Math.max(0,(end-state.shift.start)/1000-(state.shift.pausedSec||0)-(state.shift.paused&&state.shift.pauseAt?(Date.now()-state.shift.pauseAt)/1000:0))}
-function render(){let rs=today(),inc=rs.reduce((a,x)=>a+x.amount,0),w=workSec();$("income").textContent=euro(inc);$("rides").textContent=rs.length;$("hours").textContent=dur(w);$("hourly").textContent=euro(w?inc/(w/3600):0);$("avg").textContent=euro(rs.length?inc/rs.length:0);$("avgDur").textContent=dur(rs.length?rs.reduce((a,x)=>a+x.duration,0)/rs.length:0);$("ridesHour").textContent=(w?rs.length/(w/3600):0).toFixed(2).replace(".",",");
-$("shift").textContent=state.shift?.active?"Fine turno":"Inizia turno";$("shift").className=state.shift?.active?"danger":"primary";$("pause").classList.toggle("hidden",!state.shift?.active);$("pause").textContent=state.shift?.paused?"Riprendi":"Pausa";$("status").textContent=!state.shift?.active?"Turno non attivo":state.shift.paused?"⏸️ Turno in pausa":"🟢 Turno attivo";
-let m={Uber:0,POS:0,Contanti:0,Buoni:0};rs.forEach(x=>m[x.payment]+=x.amount);$("methods").innerHTML=Object.entries(m).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:6px 0"><span>${k}</span><b>${euro(v)}</b></div>`).join("");
-$("list").innerHTML=rs.length?rs.slice().reverse().map(x=>`<div class="trip"><b>${euro(x.amount)}</b> · ${x.payment}<br><span class="muted">${new Date(x.end).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})} · ${dur(x.duration)}</span></div>`).join(""):"Nessuna corsa.";
+const fmt=s=>{s=Math.max(0,Math.floor(s));let h=Math.floor(s/3600),m=Math.floor(s%3600/60),q=s%60;return h?`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`:`${String(m).padStart(2,"0")}:${String(q).padStart(2,"0")}`};
+const today=()=>s.rides.filter(x=>new Date(x.end).toDateString()===new Date().toDateString());
+function work(){if(!s.shift)return 0;let end=s.shift.active?Date.now():s.shift.end;return Math.max(0,(end-s.shift.start)/1000-(s.shift.pausedSec||0)-(s.shift.paused&&s.shift.pauseAt?(Date.now()-s.shift.pauseAt)/1000:0))}
+function save(){localStorage.setItem(KEY,JSON.stringify(s))}
+function kmValue(id){const n=parseFloat($(id).value);return Number.isFinite(n)?n:null}
+function render(){
+let rs=today(),inc=rs.reduce((a,x)=>a+x.amount,0),w=work();$("income").textContent=euro(inc);$("rides").textContent=rs.length;$("hours").textContent=fmt(w);$("hourly").textContent=euro(w?inc/(w/3600):0);$("avg").textContent=euro(rs.length?inc/rs.length:0);$("avgDur").textContent=fmt(rs.length?rs.reduce((a,x)=>a+x.duration,0)/rs.length:0);
+$("shift").textContent=s.shift?.active?(s.shift.paused?"▶ Riprendi":"■ Fine turno"):"▶ Inizia turno";$("shift").className=s.shift?.active?"red":"yellow";$("pause").classList.toggle("hidden",!s.shift?.active);$("pause").textContent=s.shift?.paused?"▶ Riprendi":"⏸ Pausa";$("status").innerHTML=s.shift?.active?(s.shift.paused?"Pausa":"In corso")+" <span class='dot'></span>":"Non attivo";$("startText").textContent=s.shift?.active?"Iniziato alle "+new Date(s.shift.start).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}):"Pronto per iniziare";
+$("bigTime").textContent=fmt(w);
+if(s.shift){
+  $("kmStart").value=s.shift.kmStart??"";
+  $("kmEnd").value=s.shift.kmEnd??"";
+  const ks=Number(s.shift.kmStart), ke=Number(s.shift.kmEnd);
+  $("kmDone").textContent=(Number.isFinite(ks)&&Number.isFinite(ke)&&ke>=ks)?((ke-ks).toFixed(1).replace(".",",")+" km"):"0 km";
 }
-$("shift").onclick=()=>{if(state.shift?.active){if(state.shift.paused){state.shift.pausedSec+=(Date.now()-state.shift.pauseAt)/1000;state.shift.paused=false;state.shift.pauseAt=null}state.shift.active=false;state.shift.end=Date.now()}else state.shift={active:true,start:Date.now(),end:null,paused:false,pauseAt:null,pausedSec:0};persist();render()};
-$("pause").onclick=()=>{if(!state.shift?.active)return;if(state.shift.paused){state.shift.pausedSec+=(Date.now()-state.shift.pauseAt)/1000;state.shift.paused=false;state.shift.pauseAt=null}else{state.shift.paused=true;state.shift.pauseAt=Date.now()}persist();render()};
-$("take").onclick=()=>{if(!state.shift?.active){alert("Prima premi Inizia turno.");return}if(state.shift.paused){alert("Il turno è in pausa.");return}if(ride){alert("C'è già una corsa in corso.");return}ride={start:Date.now()};$("rideState").textContent="corsa presa";$("saveBox").classList.remove("hidden");timer=setInterval(()=>{$("rideTime").textContent=dur((Date.now()-ride.start)/1000)},500)};
-$("client").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}ride.client=true;$("rideState").textContent="cliente prelevato"};
-$("saveRide").onclick=()=>{if(!ride)return;let end=Date.now(),a=parseFloat($("amount").value)||0;state.rides.push({start:ride.start,end,duration:(end-ride.start)/1000,amount:a,payment:$("payment").value});ride=null;clearInterval(timer);$("rideState").textContent="nessuna";$("rideTime").textContent="00:00";$("saveBox").classList.add("hidden");$("amount").value="";persist();render()};
-$("cancel").onclick=()=>{ride=null;clearInterval(timer);$("saveBox").classList.add("hidden");$("rideState").textContent="nessuna";$("rideTime").textContent="00:00"};
-$("refresh").onclick=()=>{$("flights").textContent="Il collegamento gratuito ai voli è predisposto; i dati live dipendono dalla disponibilità della fonte pubblica.";};
-setInterval(render,1000);render();
-if("serviceWorker"in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+let m={Contanti:0,POS:0,AppItTaxi:0,UBER:0,Buoni:0};rs.forEach(x=>m[x.payment]+=x.amount);$("methods").innerHTML=Object.entries(m).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0"><span>${k}</span><b>${euro(v)}</b></div>`).join("");
+$("list").innerHTML=rs.length?rs.slice().reverse().map(x=>`<div class="trip"><b>${euro(x.amount)}</b> · ${x.payment}<br><span class="muted">${new Date(x.end).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})} · ${fmt(x.duration)}</span></div>`).join(""):"Nessuna corsa.";
+}
+$("shift").onclick=()=>{
+ if(s.shift?.active){
+   const ke=kmValue("kmEnd");
+   if(s.shift.kmStart!==null && s.shift.kmStart!==undefined && ke===null){
+     alert("Inserisci i km finali prima di terminare il turno."); $("kmEnd").focus(); return;
+   }
+   if(ke!==null && s.shift.kmStart!==null && ke<s.shift.kmStart){
+     alert("I km finali non possono essere inferiori ai km iniziali."); return;
+   }
+   if(s.shift.paused){s.shift.pausedSec+=(Date.now()-s.shift.pauseAt)/1000;s.shift.paused=false;s.shift.pauseAt=null}
+   s.shift.kmEnd=ke;
+   s.shift.active=false;s.shift.end=Date.now();
+ }else{
+   const ks=kmValue("kmStart");
+   s.shift={active:true,start:Date.now(),end:null,paused:false,pauseAt:null,pausedSec:0,kmStart:ks,kmEnd:null};
+ }
+ save();render();
+};
+$("kmStart").addEventListener("change",()=>{if(s.shift?.active){const v=kmValue("kmStart");if(v!==null)s.shift.kmStart=v;save();render()}});
+$("kmEnd").addEventListener("change",()=>{if(s.shift?.active){const v=kmValue("kmEnd");if(v!==null)s.shift.kmEnd=v;save();render()}});
+$("pause").onclick=()=>{if(!s.shift?.active)return;if(s.shift.paused){s.shift.pausedSec+=(Date.now()-s.shift.pauseAt)/1000;s.shift.paused=false;s.shift.pauseAt=null}else{s.shift.paused=true;s.shift.pauseAt=Date.now()}save();render()};
+$("take").onclick=()=>{if(!s.shift?.active||s.shift.paused){alert(s.shift?.paused?"Il turno è in pausa.":"Prima inizia il turno.");return}if(!ride)ride={start:Date.now()};$("rideBox").classList.remove("hidden");$("rideTimer").textContent="00:00";$("take").classList.add("yellow")};
+$("client").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}ride.client=true;$("client").classList.add("yellow")};
+$("finish").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}$("rideBox").classList.remove("hidden");$("amount").focus()};
+$("openAmount").onclick=()=>{if(!ride){alert("Prima premi Corsa presa.");return}$("rideBox").classList.remove("hidden");$("amount").focus()};
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("amount").value=b.dataset.a});
+document.querySelectorAll("#pay button").forEach(b=>b.onclick=()=>{selectedPay=b.dataset.p;document.querySelectorAll("#pay button").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("selectedPayment").textContent="Pagamento selezionato: "+selectedPay});
+$("saveRide").onclick=()=>{if(!ride)return;let end=Date.now(),a=parseFloat($("amount").value)||0;s.rides.push({start:ride.start,end,duration:(end-ride.start)/1000,amount:a,payment:selectedPay});ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00";$("amount").value="";$("take").classList.remove("yellow");$("client").classList.remove("yellow");save();render()};
+$("cancel").onclick=()=>{ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00"};
+$("refresh").onclick=()=>{$("flights").innerHTML='<div class="notice">✈️ Aggiornamento richiesto. I dati live dipendono dalla fonte gratuita disponibile.</div>'};
+setInterval(()=>{if(ride)$("rideTimer").textContent=fmt((Date.now()-ride.start)/1000);render()},1000);render();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
