@@ -32,52 +32,109 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 .trip{padding:11px 0;border-bottom:1px solid #222}.trip:last-child{border-bottom:0}
 .nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(650px,100%);padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#08090aee;backdrop-filter:blur(15px);border-top:1px solid #202225;display:grid;grid-template-columns:repeat(5,1fr);z-index:5}.nav button{border:0;background:transparent;padding:7px 2px;font-size:11px;color:#8f9297}.nav button.active{color:var(--yellow)}.navIcon{font-size:20px;display:block;margin-bottom:2px}
 .notice{padding:9px 11px;border-radius:12px;background:#17181a;color:var(--muted);font-size:12px}
+.flightTabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0}
+.flightTab{border:1px solid #2b2d30;background:#17181a;color:#f5f5f5;border-radius:10px;padding:10px;font-weight:800}
+.flightTab.active{background:#ffd21a;color:#050505;border-color:#ffd21a}
+.flightLinks{margin-top:10px}
+.yellowBtn{display:block;text-align:center;background:#ffd21a;color:#050505;text-decoration:none;font-weight:800;padding:12px;border-radius:12px}
+
+[data-page]{transition:opacity .15s ease}
+.page-hidden{display:none!important}
+.altroCard{margin-bottom:18px}
 </style>
 </head>
 <body>
 <div class="app">
 <header class="header"><div class="brand"><div class="taxiIcon">🚕</div><div><div class="title">TAXI TRACKER FCO</div><div class="subtitle">Roma · Fiumicino</div></div></div><button class="gear">⚙️</button></header>
 
-<section class="card" id="flightCard">
-  <div class="row" style="justify-content:space-between;align-items:center">
-    <div>
-      <div class="eyebrow">✈️ FIUMICINO</div>
-      <h2 style="margin:4px 0 0">Arrivi</h2>
-    </div>
-    <button class="small yellow" id="refreshFlights">↻ Aggiorna</button>
-  </div>
-  <div class="flightTabs">
-    <button class="flightTab active" data-flight-tab="arrivi">🟡 Arrivi</button>
-    <button class="flightTab" data-flight-tab="adesso">🔴 Adesso</button>
-  </div>
-  <div class="flightMeta">
-    <span>Fonte gratuita · Fiumicino.it</span>
-    <span id="flightClock"></span>
-  </div>
-  <div id="flights" class="flightList">
-    <div class="notice"><b>Arrivi Fiumicino</b><br>Apri il tabellone aggiornato per vedere i dati live.</div>
-  </div>
-  <div class="flightActions">
-    <a class="yellowBtn" id="openFlights" href="https://www.fiumicino.it/arrivi" target="_blank" rel="noopener">✈️ Apri arrivi aggiornati</a>
-    <a class="darkBtn" id="openNow" href="https://www.fiumicino.it/adesso" target="_blank" rel="noopener">📡 Aerei in arrivo adesso</a>
-  </div>
+<section class="card" data-page="home">
+<div class="shiftTop><b>🚕 Turno</b><div id="status" class="status">Non attivo</div></div>
+<div id="bigTime" class="bigtime">00:00:00</div><div id="startText" class="center muted">Pronto per iniziare</div>
+<div class="row" style="margin-top:12px"><button id="pause" class="hidden">⏸ Pausa</button><button id="shift" class="yellow">▶ Inizia turno</button></div>
 </section>
 
-<section class="card"><div class="sectionTitle">💶 Incassi per metodo</div><div id="methods"></div></section>
-<section class="card"><div class="sectionTitle">🧾 Corse di oggi</div><div id="list" class="muted">Nessuna corsa.</div></section>
+<section class="card" data-page="home">
+<div class="sectionTitle"><span>🚗 Chilometri turno</span><span id="kmDone" class="yellowText">0 km</span></div>
+<div class="row">
+  <div><label>Km iniziali</label><input id="kmStart" type="number" inputmode="numeric" min="0" step="1" placeholder="es. 125000"></div>
+  <div><label>Km finali</label><input id="kmEnd" type="number" inputmode="numeric" min="0" step="1" placeholder="A fine turno"></div>
+</div>
+<div class="muted" style="margin-top:8px">I km del turno vengono calcolati automaticamente come km finali − km iniziali.</div>
+</section>
+
+<section class="grid" data-page="home stats">
+<div class="stat"><div class="label">🚕 Corse</div><div id="rides" class="value">0</div></div>
+<div class="stat"><div class="label">💰 Incasso totale</div><div id="income" class="value">€0,00</div></div>
+<div class="stat"><div class="label">⏱ Ore lavorate</div><div id="hours" class="value">0:00</div></div>
+<div class="stat"><div class="label">📈 €/ora</div><div id="hourly" class="value">€0,00</div></div>
+<div class="stat"><div class="label">💶 Media/corsa</div><div id="avg" class="value">€0,00</div></div>
+<div class="stat"><div class="label">⏱ Durata media</div><div id="avgDur" class="value">0:00</div></div>
+</section>
+
+<section class="card" data-page="corse">
+<div class="sectionTitle"><span>🚕 NUOVA CORSA</span><span id="rideTimer" class="muted">00:00</span></div>
+<div class="quick">
+<button id="take"><span>🚩</span>Corsa presa</button>
+<button id="client"><span>👥</span>Cliente a bordo</button>
+<button id="finish" class="yellow"><span>🏁</span>Fine corsa</button>
+<button id="openAmount"><span>€</span>Incasso</button>
+</div>
+</section>
+
+<section id="rideBox" data-page="corse" class="card hidden">
+<div class="sectionTitle">💶 Incasso corsa</div>
+<label>Importo €</label><input id="amount" type="number" inputmode="decimal" placeholder="0,00" step=".01">
+<div class="amountRow"><button data-a="10">10</button><button data-a="15">15</button><button data-a="20">20</button><button data-a="25">25</button><button data-a="30">30</button></div>
+<label style="margin-top:12px">Metodo di pagamento</label>
+<div class="pay" id="pay">
+<button data-p="Contanti" class="active">💵<br>Contanti</button>
+<button data-p="POS">💳<br>POS</button>
+<button data-p="AppItTaxi">🚕<br>AppItTaxi</button>
+<button data-p="UBER">📱<br>UBER</button>
+<button data-p="Buoni">🎟<br>Buoni</button>
+</div>
+<div id="selectedPayment" class="notice" style="margin-top:8px">Pagamento selezionato: Contanti</div>
+<button id="saveRide" class="yellow" style="width:100%;margin-top:12px">Salva incasso e corsa</button>
+<button id="cancel" style="width:100%;margin-top:7px">Annulla</button>
+</section>
+
+<section class="card" data-page="fiumicino">
+<div class="sectionTitle">
+  <span>✈️ Arrivi Fiumicino</span>
+  <button id="refresh" class="smallBtn">↻ Aggiorna</button>
+</div>
+<div class="flightTabs">
+  <button class="flightTab active" data-flight="arrivi">🟡 Arrivi</button>
+  <button class="flightTab" data-flight="adesso">🔴 Adesso</button>
+</div>
+<div id="flights"><div class="notice">Dati aggiornati direttamente dalla fonte gratuita.</div></div>
+<div class="flightLinks">
+  <a class="yellowBtn" id="flightLink" href="https://www.fiumicino.it/arrivi" target="_blank" rel="noopener">✈️ Apri arrivi aggiornati</a>
+</div>
+</section>
+
+<section class="card" data-page="statistiche"><div class="sectionTitle">💶 Incassi per metodo</div><div id="methods"></div></section>
+<section class="card" data-page="corse"><div class="sectionTitle">🧾 Corse di oggi</div><div id="list" class="muted">Nessuna corsa.</div></section>
+<section class="card altroCard page-hidden" data-page="altro" id="altroPage">
+  <div class="sectionTitle">⚙️ Altro</div>
+  <div class="notice">
+    <b>Taxi Tracker FCO</b><br>
+    Gestisci turno, corse, incassi, chilometri e statistiche dai menu qui sotto.
+  </div>
+</section>
 </div>
 
 <nav class="nav">
-<button class="active"><span class="navIcon">⌂</span>Home</button>
-<button><span class="navIcon">🚕</span>Corse</button>
-<button><span class="navIcon">✈️</span>Fiumicino</button>
-<button><span class="navIcon">▥</span>Statistiche</button>
-<button><span class="navIcon">•••</span>Altro</button>
+<button class="active" data-nav="home"><span class="navIcon">⌂</span>Home</button>
+<button data-nav="corse"><span class="navIcon">🚕</span>Corse</button>
+<button data-nav="fiumicino"><span class="navIcon">✈️</span>Fiumicino</button>
+<button data-nav="statistiche"><span class="navIcon">▥</span>Statistiche</button>
+<button data-nav="altro"><span class="navIcon">•••</span>Altro</button>
 </nav>
 
 <script>
 "use strict";
-const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v9";
+const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v10";
 let raw=localStorage.getItem(KEY), old=null;
 if(!raw){
   for(const k of ["taxi_tracker_fco_v6","taxi_tracker_fco_v5","taxi_tracker_fco_v4"]){
@@ -222,31 +279,45 @@ $("saveRide").onclick=()=>{
   $("take").classList.remove("yellow");$("client").classList.remove("yellow");save();render();
 };
 $("cancel").onclick=()=>{ride=null;$("rideBox").classList.add("hidden");$("rideTimer").textContent="00:00"};
-function renderFlights(){
-  const live = document.querySelector(".flightTab.active")?.dataset.flightTab === "adesso";
-  $("flights").innerHTML = live
-    ? '<div class="notice"><b>📡 Aerei in arrivo adesso</b><br>Dati live disponibili nella fonte gratuita.</div>'
-    : '<div class="notice"><b>✈️ Arrivi Fiumicino</b><br>Tabellone aggiornato con voli, orari, provenienze, terminal e stato.</div>';
-  $("flightClock").textContent = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
+function showFlights(kind){
+  const live=kind==="adesso";
+  $("flights").innerHTML=live
+    ? '<div class="notice"><b>🔴 Aerei in arrivo adesso</b><br>Dati live dalla fonte gratuita Fiumicino.it.</div>'
+    : '<div class="notice"><b>🟡 Arrivi Fiumicino</b><br>Tabellone aggiornato con volo, provenienza, orario, terminal e stato.</div>';
+  $("flightLink").href=live?"https://www.fiumicino.it/adesso":"https://www.fiumicino.it/arrivi";
+  $("flightLink").textContent=live?"📡 Apri aerei in arrivo adesso":"✈️ Apri arrivi aggiornati";
 }
 document.querySelectorAll(".flightTab").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".flightTab").forEach(x=>x.classList.remove("active"));
   b.classList.add("active");
-  const live=b.dataset.flightTab==="adesso";
-  $("openFlights").style.display=live?"none":"block";
-  $("openNow").style.display=live?"block":"none";
-  renderFlights();
+  showFlights(b.dataset.flight);
 });
-$("refreshFlights").onclick=()=>{
-  const live=document.querySelector(".flightTab.active")?.dataset.flightTab==="adesso";
-  window.open(live?"https://www.fiumicino.it/adesso":"https://www.fiumicino.it/arrivi","_blank");
-  renderFlights();
+$("refresh").onclick=()=>{
+  const active=document.querySelector(".flightTab.active")?.dataset.flight||"arrivi";
+  window.open(active==="adesso"?"https://www.fiumicino.it/adesso":"https://www.fiumicino.it/arrivi","_blank");
+  showFlights(active);
 };
-renderFlights();
-setInterval(()=>{$("flightClock").textContent=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})},15000);setInterval(()=>{
+showFlights("arrivi");
+
+setInterval(()=>{
   if(ride)$("rideTimer").textContent=fmt((Date.now()-ride.start)/1000);
   render();
 },1000);
 save();render();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+function showPage(page){
+  document.querySelectorAll("[data-page]").forEach(el=>{
+    const pages=(el.dataset.page||"").split(/\s+/);
+    el.classList.toggle("page-hidden", !pages.includes(page));
+  });
+  document.querySelectorAll(".nav [data-nav]").forEach(b=>{
+    b.classList.toggle("active", b.dataset.nav===page);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".nav [data-nav]").forEach(b=>{
+  b.addEventListener("click",()=>showPage(b.dataset.nav));
+});
+showPage("home");
 </script></body></html>
