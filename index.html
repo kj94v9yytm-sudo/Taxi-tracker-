@@ -143,7 +143,7 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
 
 <script>
 "use strict";
-const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v15";
+const $=id=>document.getElementById(id),KEY="taxi_tracker_fco_v16";
 let raw=localStorage.getItem(KEY), old=null;
 if(!raw){
   for(const k of ["taxi_tracker_fco_v6","taxi_tracker_fco_v5","taxi_tracker_fco_v4"]){
@@ -214,8 +214,8 @@ function render(){
     :(todayShifts().length?"Pronto per un nuovo turno":"Pronto per iniziare");
 
   if(s.shift){
-    if(document.activeElement!==$("kmStart")) $("kmStart").value=s.shift.kmStart??"";
-    if(document.activeElement!==$("kmEnd")) $("kmEnd").value=s.shift.kmEnd??"";
+    // KM fields are intentionally not rewritten here.
+    // This prevents Safari from clearing partially typed odometer values.
     const ks=Number(s.shift.kmStart),ke=Number(s.shift.kmEnd);
     $("kmDone").textContent=(Number.isFinite(ks)&&Number.isFinite(ke)&&ke>=ks)?((ke-ks).toFixed(1).replace(".",",")+" km"):"0 km";
   }else{
@@ -265,24 +265,30 @@ $("shift").onclick=()=>{
   }else{
     const ks=kmValue("kmStart");
     s.shift={id:Date.now(),active:true,start:Date.now(),end:null,paused:false,pauseAt:null,pausedSec:0,kmStart:ks,kmEnd:null};
+    $("kmStart").value=ks===null?"":String(ks);
+    $("kmEnd").value="";
   }
   save();render();
 };
 
-$("kmStart").addEventListener("change",()=>{
+$("kmStart").addEventListener("blur",()=>{
   if(s.shift?.active){
     const raw=$("kmStart").value.trim().replace(",",".");
-    const v=raw===""?null:Number(raw);
-    if(v!==null && Number.isFinite(v) && v>=0) s.shift.kmStart=v;
-    save();render();
+    if(raw!==""){
+      const v=Number(raw);
+      if(Number.isFinite(v)&&v>=0)s.shift.kmStart=v;
+    }
+    save();
   }
 });
-$("kmEnd").addEventListener("change",()=>{
+$("kmEnd").addEventListener("blur",()=>{
   if(s.shift?.active){
     const raw=$("kmEnd").value.trim().replace(",",".");
-    const v=raw===""?null:Number(raw);
-    if(v!==null && Number.isFinite(v) && v>=0) s.shift.kmEnd=v;
-    save();render();
+    if(raw!==""){
+      const v=Number(raw);
+      if(Number.isFinite(v)&&v>=0)s.shift.kmEnd=v;
+    }
+    save();
   }
 });
 $("pause").onclick=()=>{
